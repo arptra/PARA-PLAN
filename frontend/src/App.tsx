@@ -8,7 +8,7 @@ function App() {
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        <h1 className={styles.title}>SQL Query Analyzer</h1>
+        <h1 className={styles.title}>PARA-PLAN Analyzer</h1>
         <nav className={styles.nav}>
           <Link to="/" className={styles.navLink}>SQL Analysis</Link>
           <Link to="/database" className={styles.navLink}>Database Connection</Link>

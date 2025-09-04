@@ -61,8 +61,8 @@ const SqlAnalyzer: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>SQL Query Analysis</h2>
-        <p>Analyze your SQL queries for performance and optimization insights</p>
+        <h2>SQL Analysis</h2>
+        <p>Advanced SQL query analysis powered by Discrete Taburetka technology</p>
       </div>
 
       <div className={styles.inputSection}>
@@ -105,7 +105,7 @@ const SqlAnalyzer: React.FC = () => {
 
       {result && (
         <div className={styles.resultSection}>
-          <h3>Analysis Results</h3>
+          <h3>Discrete PARA-PLAN Taburetka Analysis Results</h3>
           
           <div className={styles.resultGrid}>
             <div className={styles.resultCard}>

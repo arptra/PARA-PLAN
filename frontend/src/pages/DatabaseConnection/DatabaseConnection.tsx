@@ -106,7 +106,7 @@ const DatabaseConnection: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Database Connection</h2>
-        <p>Connect to your database and execute SQL queries</p>
+        <p>Connect to your database and execute SQL queries with Discrete Taburetka technology</p>
       </div>
 
       {!isConnected ? (
@@ -271,7 +271,7 @@ const DatabaseConnection: React.FC = () => {
 
           {queryResult && (
             <div className={styles.resultSection}>
-              <h3>Query Results</h3>
+              <h3>Discrete PARA-PLAN Taburetka Query Results</h3>
               
               <div className={styles.resultInfo}>
                 <span>Rows: {queryResult.rowCount}</span>
