@@ -1,6 +1,6 @@
-# SQL Query Analyzer - Frontend
+# Discrete PARA-PLAN Taburetka Analyzer - Frontend
 
-Фронтенд приложение для анализа SQL запросов, построенное на React + TypeScript.
+Фронтенд приложение для анализа SQL запросов, построенное на React + TypeScript. Разработано организацией Discrete Taburetka.
 
 ## Возможности
 
