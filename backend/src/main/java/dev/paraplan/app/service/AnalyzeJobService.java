@@ -7,6 +7,7 @@ import dev.paraplan.api.model.JobStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -61,7 +62,7 @@ public class AnalyzeJobService {
       Thread.sleep(ThreadLocalRandom.current().nextInt(300, 1200));
       AnalyzeResult result = new AnalyzeResult()
           .fingerprint(UUID.randomUUID().toString())
-          .addRecommendationsItem("placeholder");
+          .recommendations(Collections.singletonList("placeholder"));
       store.put(jobId, new JobState(JobState.State.SUCCEEDED, result));
     } catch (Exception e) {
       store.put(jobId, new JobState(JobState.State.FAILED, null));
