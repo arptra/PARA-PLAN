@@ -1,0 +1,106 @@
+openapi: 3.0.1
+info:
+  title: PARA-PLAN API
+  version: 1.0.0
+paths:
+  /analyze-jobs:
+    post:
+      tags:
+        - Analyze
+      operationId: createAnalyzeJob
+      parameters:
+        - name: wait
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+      responses:
+        '200':
+          description: Job completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResult'
+        '202':
+          description: Job accepted
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAccepted'
+  /jobs/{jobId}:
+    get:
+      tags:
+        - Jobs
+      operationId: getJobStatus
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        '404':
+          description: Not found
+components:
+  schemas:
+    AnalyzeRequest:
+      type: object
+      properties:
+        query:
+          type: string
+      required:
+        - query
+    AnalyzeResult:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+        features:
+          type: object
+          properties:
+            totalCost:
+              type: number
+              format: double
+        predicted:
+          type: object
+          properties:
+            p95ms:
+              type: integer
+        recommendations:
+          type: array
+          items:
+            type: string
+    JobAccepted:
+      type: object
+      properties:
+        jobId:
+          type: string
+        statusUrl:
+          type: string
+    JobStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+        state:
+          type: string
+          enum: [QUEUED, RUNNING, SUCCEEDED, FAILED]
+        result:
+          $ref: '#/components/schemas/AnalyzeResult'

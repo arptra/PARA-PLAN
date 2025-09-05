@@ -1,2 +1,8 @@
-rootProject.name = 'para-plan'
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 include 'backend', 'core'
