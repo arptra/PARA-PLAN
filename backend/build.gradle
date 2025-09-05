@@ -2,7 +2,6 @@ plugins {
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'java'
-    id 'org.springdoc.openapi-gradle-plugin' version '1.8.0'
 }
 
 group = 'com.example'
@@ -15,11 +14,18 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
-openApi {
-    apiDocsUrl.set("http://localhost:8080/v3/api-docs.yaml")
-    outputDir.set(file("${buildDir}/openapi"))
-    outputFileName.set("openapi")
+tasks.register('generateOpenApi') {
+    group = 'documentation'
+    description = 'Exports OpenAPI spec from a running server'
+    doLast {
+        def url = new URL('http://localhost:8080/v3/api-docs.yaml')
+        def outputDir = file("${buildDir}/openapi")
+        outputDir.mkdirs()
+        def outputFile = new File(outputDir, 'openapi.yaml')
+        url.withInputStream { input ->
+            outputFile.withOutputStream { out -> out << input }
+        }
+    }
 }
 
 test {
