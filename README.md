@@ -75,3 +75,5 @@ To generate sources and run the application:
 ```
 
 Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+> **Security notice:** the current JWT configuration uses a stub decoder and is intended only for local development.
