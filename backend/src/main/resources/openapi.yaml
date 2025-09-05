@@ -1,0 +1,298 @@
+openapi: 3.0.1
+info:
+  title: PARA-PLAN API
+  version: 1.0.0
+paths:
+  /analyze-jobs:
+    post:
+      parameters:
+        - in: query
+          name: wait
+          schema:
+            type: integer
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResult'
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobCreatedResponse'
+  /jobs/{jobId}:
+    get:
+      parameters:
+        - in: path
+          name: jobId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobInfo'
+  /webhooks:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+      responses:
+        '200':
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookRequest'
+  /db/profiles:
+    get:
+      responses:
+        '200':
+          description: List profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DbProfile'
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DbProfilesUpsertRequest'
+      responses:
+        '200':
+          description: Upserted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DbProfile'
+  /db/profiles/{id}:
+    get:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DbProfile'
+  /arch/plans:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchPlanCreateRequest'
+      responses:
+        '200':
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchPlanResponse'
+  /arch/plans/{planId}:
+    get:
+      parameters:
+        - in: path
+          name: planId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchPlan'
+  /arch/plans/{planId}/analyze-jobs:
+    post:
+      parameters:
+        - in: path
+          name: planId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: wait
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResult'
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobCreatedResponse'
+components:
+  schemas:
+    AnalyzeOptions:
+      type: object
+      properties:
+        includeSelectivity:
+          type: boolean
+        sampleSize:
+          type: integer
+    AnalyzeRequest:
+      type: object
+      properties:
+        profileId:
+          type: string
+        schema:
+          type: string
+        options:
+          $ref: '#/components/schemas/AnalyzeOptions'
+    Recommendation:
+      type: object
+      properties:
+        action:
+          type: string
+        target:
+          type: string
+        reason:
+          type: string
+        expectedBenefit:
+          type: string
+    AnalyzeResult:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            type: string
+        predicted:
+          type: object
+        landscape:
+          type: object
+        selectivity:
+          type: object
+        distribution:
+          type: object
+        monteCarlo:
+          type: object
+        outliers:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        whatIf:
+          type: object
+        diffReport:
+          type: object
+    JobCreatedResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        statusUrl:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    JobInfo:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [QUEUED, RUNNING, SUCCEEDED, FAILED]
+        result:
+          $ref: '#/components/schemas/AnalyzeResult'
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+    WebhookRequest:
+      type: object
+      properties:
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+    DbProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        driver:
+          type: string
+        secretRef:
+          type: string
+        description:
+          type: string
+    DbProfilesUpsertRequest:
+      type: object
+      properties:
+        profiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DbProfile'
+    ArchPlanCreateRequest:
+      type: object
+      properties:
+        mode:
+          type: string
+        topology:
+          type: object
+        constraints:
+          type: object
+    ArchPlanResponse:
+      type: object
+      properties:
+        planId:
+          type: string
+        status:
+          type: string
+    ArchPlan:
+      type: object
+      properties:
+        planId:
+          type: string
+        mode:
+          type: string
+        topology:
+          type: object
+        constraints:
+          type: object
