@@ -65,3 +65,13 @@ It helps analysts, DBAs, and developers avoid performance issues and keep system
                                                    │   Dashboard   │
                                                    └──────────────┘
 ```
+
+## Development
+
+To generate sources and run the application:
+
+```bash
+./gradlew openApiGenerate bootRun
+```
+
+Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
