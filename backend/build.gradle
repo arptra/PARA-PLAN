@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'java'
+    id 'org.springdoc.openapi-gradle-plugin' version '1.8.0'
 }
 
 group = 'com.example'
@@ -11,8 +12,15 @@ sourceCompatibility = '17'
 dependencies {
     implementation project(':core')
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+openApi {
+    apiDocsUrl.set("http://localhost:8080/v3/api-docs.yaml")
+    outputDir.set(file("${buildDir}/openapi"))
+    outputFileName.set("openapi")
 }
 
 test {
