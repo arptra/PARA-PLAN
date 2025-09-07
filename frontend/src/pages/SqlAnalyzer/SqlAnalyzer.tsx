@@ -9,6 +9,13 @@ const SqlAnalyzer: React.FC = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Job flow state
+  const [jobId, setJobId] = useState('');
+  const [lastIssuedJobId, setLastIssuedJobId] = useState<string | null>(null);
+  const [isSubmittingJob, setIsSubmittingJob] = useState(false);
+  const [isCheckingJob, setIsCheckingJob] = useState(false);
+  const [jobResult, setJobResult] = useState<AnalysisResult | null>(null);
+
   const handleAnalyze = async () => {
     if (!sqlQuery.trim()) {
       setError('Please enter a SQL query');
@@ -52,6 +59,61 @@ const SqlAnalyzer: React.FC = () => {
     }
   };
 
+  // Submit SQL to get Job ID (mock)
+  const handleSubmitJob = async () => {
+    if (!sqlQuery.trim()) {
+      setError('Please enter a SQL query');
+      return;
+    }
+    setError(null);
+    setIsSubmittingJob(true);
+    setLastIssuedJobId(null);
+    try {
+      await new Promise(r => setTimeout(r, 800));
+      const mockJobId = 'JOB-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+      setLastIssuedJobId(mockJobId);
+      setJobId(mockJobId);
+    } catch (e) {
+      setError('Failed to submit job');
+    } finally {
+      setIsSubmittingJob(false);
+    }
+  };
+
+  // Check Job by ID (mock)
+  const handleCheckJob = async () => {
+    if (!jobId.trim()) {
+      setError('Please enter a Job ID');
+      return;
+    }
+    setError(null);
+    setIsCheckingJob(true);
+    setJobResult(null);
+    try {
+      await new Promise(r => setTimeout(r, 900));
+      const mock: AnalysisResult = {
+        query: '-- restored by job ' + jobId,
+        analysis: {
+          tables: ['users'],
+          columns: ['id', 'email', 'status'],
+          joins: [],
+          whereConditions: ["status = 'active'"],
+          orderBy: ['id DESC'],
+          groupBy: [],
+          estimatedRows: 4200,
+          complexity: 'MEDIUM',
+          suggestions: ['Consider partial index on status']
+        },
+        executionTime: 32
+      };
+      setJobResult(mock);
+    } catch (e) {
+      setError('Failed to fetch job result');
+    } finally {
+      setIsCheckingJob(false);
+    }
+  };
+
   const handleClear = () => {
     setSqlQuery('');
     setResult(null);
@@ -86,13 +148,60 @@ const SqlAnalyzer: React.FC = () => {
             disabled={isAnalyzing || !sqlQuery.trim()}
             className={styles.analyzeButton}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Query'}
+            {isAnalyzing ? 'Analyzing...' : 'Analyze Query (sync mock)'}
           </button>
           <button
             onClick={handleClear}
             className={styles.clearButton}
           >
             Clear
+          </button>
+        </div>
+      </div>
+
+      {/* Job submit/check flow */}
+      <div className={styles.inputSection}>
+        <div className={styles.textareaContainer}>
+          <h3>Async Job Flow</h3>
+          <p>Submit SQL to receive a Job ID or enter a Job ID to fetch result.</p>
+        </div>
+        <div className={styles.buttonGroup}>
+          <button
+            onClick={handleSubmitJob}
+            disabled={isSubmittingJob || !sqlQuery.trim()}
+            className={styles.analyzeButton}
+          >
+            {isSubmittingJob ? 'Submitting…' : 'Submit SQL → Get Job ID'}
+          </button>
+        </div>
+        {lastIssuedJobId && (
+          <div className={styles.resultSection}>
+            <div className={styles.metrics}>
+              <div className={styles.metric}>
+                <span className={styles.metricLabel}>Last Job ID:</span>
+                <span className={styles.metricValue}><code>{lastIssuedJobId}</code></span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={styles.textareaContainer}>
+          <label htmlFor="jobId" className={styles.label}>Job ID:</label>
+          <input
+            id="jobId"
+            value={jobId}
+            onChange={(e) => setJobId(e.target.value)}
+            placeholder="JOB-XXXXXX"
+            className={styles.textarea}
+          />
+        </div>
+        <div className={styles.buttonGroup}>
+          <button
+            onClick={handleCheckJob}
+            disabled={isCheckingJob || !jobId.trim()}
+            className={styles.analyzeButton}
+          >
+            {isCheckingJob ? 'Checking…' : 'Check Job Result'}
           </button>
         </div>
       </div>
@@ -180,6 +289,50 @@ const SqlAnalyzer: React.FC = () => {
                   <li key={index} className={styles.listItem}>{suggestion}</li>
                 ))}
               </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {jobResult && (
+        <div className={styles.resultSection}>
+          <h3>Job Result</h3>
+          <div className={styles.resultGrid}>
+            <div className={styles.resultCard}>
+              <h4>Query Overview</h4>
+              <div className={styles.queryPreview}>
+                <code>{jobResult.query}</code>
+              </div>
+            </div>
+            {/* Reuse the same blocks for jobResult */}
+            <div className={styles.resultCard}>
+              <h4>Tables Involved</h4>
+              <ul className={styles.list}>
+                {jobResult.analysis.tables.map((table, index) => (
+                  <li key={index} className={styles.listItem}>{table}</li>
+                ))}
+              </ul>
+            </div>
+            <div className={styles.resultCard}>
+              <h4>Performance Metrics</h4>
+              <div className={styles.metrics}>
+                <div className={styles.metric}>
+                  <span className={styles.metricLabel}>Estimated Rows:</span>
+                  <span className={styles.metricValue}>{jobResult.analysis.estimatedRows.toLocaleString()}</span>
+                </div>
+                <div className={styles.metric}>
+                  <span className={styles.metricLabel}>Complexity:</span>
+                  <span className={`${styles.complexity} ${styles[jobResult.analysis.complexity.toLowerCase()]}`}>
+                    {jobResult.analysis.complexity}
+                  </span>
+                </div>
+                {jobResult.executionTime && (
+                  <div className={styles.metric}>
+                    <span className={styles.metricLabel}>Execution Time:</span>
+                    <span className={styles.metricValue}>{jobResult.executionTime}ms</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
