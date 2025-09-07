@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import ArchitectureSelect from './pages/ArchitectureSelect/ArchitectureSelect';
 import SqlAnalyzer from './pages/SqlAnalyzer/SqlAnalyzer';
 import DatabaseConnection from './pages/DatabaseConnection/DatabaseConnection';
+import Contacts from './pages/Contacts/Contacts';
 import styles from './App.module.css';
 
 function App() {
@@ -20,12 +21,8 @@ function App() {
             </button>
           )}
           <h1 className={styles.title}>PARA-PLAN Analyzer</h1>
+          <Link to="/contacts" className={styles.rightLink}>Contacts</Link>
         </div>
-        {/* <nav className={styles.nav}>
-          <Link to="/" className={styles.navLink}>Architectures</Link>
-          <Link to="/single-node" className={styles.navLink}>Single Node</Link>
-          <Link to="/database" className={styles.navLink}>Database</Link>
-        </nav> */}
       </header>
       
       <main className={styles.main}>
@@ -33,6 +30,7 @@ function App() {
           <Route path="/" element={<ArchitectureSelect />} />
           <Route path="/single" element={<SqlAnalyzer />} />
           <Route path="/database" element={<DatabaseConnection />} />
+          <Route path="/contacts" element={<Contacts />} />
         </Routes>
       </main>
     </div>

@@ -47,6 +47,7 @@
 }
 
 .headerRow {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,14 +58,27 @@
   position: absolute;
   left: 1rem;
   top: 1.1rem;
-  background: #f8f9fa;
-  color: #333;
-  border: 2px solid #e9ecef;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: none;
   padding: 0.35rem 0.6rem;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .backButton:hover {
-  background: #e9ecef;
+  background: rgba(255, 255, 255, 0.2);
 }
+
+.rightLink {
+  position: absolute;
+  right: 1rem;
+  top: 1.1rem;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  background: rgba(255,255,255,0.12);
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+}
+.rightLink:hover { background: rgba(255,255,255,0.2); }
