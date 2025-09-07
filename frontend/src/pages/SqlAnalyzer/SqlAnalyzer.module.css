@@ -234,6 +234,38 @@
   color: #721c24;
 }
 
+.jobBanner {
+  background: #e7f1ff;
+  border: 1px solid #cfe2ff;
+  color: #084298;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.jobBannerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.jobLabel { font-weight: 600; }
+.jobCode {
+  background: #fff;
+  border: 1px dashed #b6d4fe;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+}
+.copyButton {
+  margin-left: auto;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.copyButton:hover { background: #0b5ed7; }
+.jobHint { font-size: 0.85rem; margin-top: 0.25rem; }
+
 @media (max-width: 768px) {
   .resultGrid {
     grid-template-columns: 1fr;
