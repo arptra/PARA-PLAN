@@ -1,117 +1,96 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './SqlAnalyzer.module.css';
 
 import { AnalysisResult } from '../../types';
+import { submitSqlJob, getJobResult } from '../../services/apiClient';
+
+const LAST_JOB_KEY = 'para_plan_last_job_id';
 
 const SqlAnalyzer: React.FC = () => {
   const [sqlQuery, setSqlQuery] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Job flow state
   const [jobId, setJobId] = useState('');
   const [lastIssuedJobId, setLastIssuedJobId] = useState<string | null>(null);
-  const [isSubmittingJob, setIsSubmittingJob] = useState(false);
-  const [isCheckingJob, setIsCheckingJob] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [jobResult, setJobResult] = useState<AnalysisResult | null>(null);
+  const pollTimer = useRef<number | null>(null);
 
-  const handleAnalyze = async () => {
+  useEffect(() => {
+    const saved = localStorage.getItem(LAST_JOB_KEY);
+    if (saved) {
+      setLastIssuedJobId(saved);
+      setJobId(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (lastIssuedJobId) localStorage.setItem(LAST_JOB_KEY, lastIssuedJobId);
+  }, [lastIssuedJobId]);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimer.current) window.clearTimeout(pollTimer.current);
+    };
+  }, []);
+
+  const startPolling = (id: string) => {
+    if (pollTimer.current) window.clearTimeout(pollTimer.current);
+    setIsPolling(true);
+    const tick = async () => {
+      const resp = await getJobResult<AnalysisResult>(id);
+      if (resp.success && resp.data) {
+        // If backend provides status, we could branch on it. Mock may not include it strictly typed.
+        setJobResult(resp.data);
+        setIsPolling(false);
+      } else {
+        // keep polling if pending
+        pollTimer.current = window.setTimeout(tick, 1200);
+      }
+    };
+    pollTimer.current = window.setTimeout(tick, 800);
+  };
+
+  const handleStartAnalysis = async () => {
     if (!sqlQuery.trim()) {
       setError('Please enter a SQL query');
       return;
     }
-
-    setIsAnalyzing(true);
     setError(null);
     setResult(null);
-
+    setJobResult(null);
+    setIsSubmitting(true);
     try {
-      // Заглушка для API вызова
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Мок данные для демонстрации
-      const mockResult: AnalysisResult = {
-        query: sqlQuery,
-        analysis: {
-          tables: ['users', 'orders', 'products'],
-          columns: ['id', 'name', 'email', 'order_date', 'total_amount'],
-          joins: ['users.id = orders.user_id', 'orders.product_id = products.id'],
-          whereConditions: ['users.status = "active"', 'orders.created_at >= "2024-01-01"'],
-          orderBy: ['orders.order_date DESC'],
-          groupBy: ['users.id'],
-          estimatedRows: 1250,
-          complexity: 'MEDIUM',
-          suggestions: [
-            'Consider adding index on users.status',
-            'Use LIMIT clause for large result sets',
-            'Consider materializing frequently accessed data'
-          ]
-        },
-        executionTime: 45
-      };
-
-      setResult(mockResult);
-    } catch (err) {
-      setError('Failed to analyze query. Please try again.');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  // Submit SQL to get Job ID (mock)
-  const handleSubmitJob = async () => {
-    if (!sqlQuery.trim()) {
-      setError('Please enter a SQL query');
-      return;
-    }
-    setError(null);
-    setIsSubmittingJob(true);
-    setLastIssuedJobId(null);
-    try {
-      await new Promise(r => setTimeout(r, 800));
-      const mockJobId = 'JOB-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      setLastIssuedJobId(mockJobId);
-      setJobId(mockJobId);
+      const id = await submitSqlJob(sqlQuery);
+      setLastIssuedJobId(id);
+      setJobId(id);
+      startPolling(id);
     } catch (e) {
-      setError('Failed to submit job');
+      setError('Failed to submit analysis job');
     } finally {
-      setIsSubmittingJob(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Check Job by ID (mock)
-  const handleCheckJob = async () => {
+  const handleResumeByJobId = async () => {
     if (!jobId.trim()) {
       setError('Please enter a Job ID');
       return;
     }
     setError(null);
-    setIsCheckingJob(true);
     setJobResult(null);
+    setLastIssuedJobId(jobId);
+    startPolling(jobId);
+  };
+
+  const handleCopyJobId = async () => {
+    if (!lastIssuedJobId) return;
     try {
-      await new Promise(r => setTimeout(r, 900));
-      const mock: AnalysisResult = {
-        query: '-- restored by job ' + jobId,
-        analysis: {
-          tables: ['users'],
-          columns: ['id', 'email', 'status'],
-          joins: [],
-          whereConditions: ["status = 'active'"],
-          orderBy: ['id DESC'],
-          groupBy: [],
-          estimatedRows: 4200,
-          complexity: 'MEDIUM',
-          suggestions: ['Consider partial index on status']
-        },
-        executionTime: 32
-      };
-      setJobResult(mock);
-    } catch (e) {
-      setError('Failed to fetch job result');
-    } finally {
-      setIsCheckingJob(false);
-    }
+      await navigator.clipboard.writeText(lastIssuedJobId);
+    } catch {}
   };
 
   const handleClear = () => {
@@ -124,8 +103,19 @@ const SqlAnalyzer: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>SQL Analysis</h2>
-        <p>Advanced SQL query analysis powered by Discrete Taburetka technology</p>
+        <p>Submit query to run analysis in background. You'll get a Job ID to resume anytime.</p>
       </div>
+
+      {lastIssuedJobId && (
+        <div className={styles.jobBanner}>
+          <div className={styles.jobBannerRow}>
+            <span className={styles.jobLabel}>Job ID</span>
+            <code className={styles.jobCode}>{lastIssuedJobId}</code>
+            <button className={styles.copyButton} onClick={handleCopyJobId}>Copy</button>
+          </div>
+          <div className={styles.jobHint}>{isPolling ? 'Waiting for result…' : 'Use this ID to resume later.'}</div>
+        </div>
+      )}
 
       <div className={styles.inputSection}>
         <div className={styles.textareaContainer}>
@@ -144,11 +134,11 @@ const SqlAnalyzer: React.FC = () => {
 
         <div className={styles.buttonGroup}>
           <button
-            onClick={handleAnalyze}
-            disabled={isAnalyzing || !sqlQuery.trim()}
+            onClick={handleStartAnalysis}
+            disabled={isSubmitting || !sqlQuery.trim()}
             className={styles.analyzeButton}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Query (sync mock)'}
+            {isSubmitting ? 'Submitting…' : 'Start Analysis (async)'}
           </button>
           <button
             onClick={handleClear}
@@ -159,32 +149,11 @@ const SqlAnalyzer: React.FC = () => {
         </div>
       </div>
 
-      {/* Job submit/check flow */}
       <div className={styles.inputSection}>
         <div className={styles.textareaContainer}>
-          <h3>Async Job Flow</h3>
-          <p>Submit SQL to receive a Job ID or enter a Job ID to fetch result.</p>
+          <h3>Resume by Job ID</h3>
+          <p>Enter an existing Job ID to fetch the current status/result.</p>
         </div>
-        <div className={styles.buttonGroup}>
-          <button
-            onClick={handleSubmitJob}
-            disabled={isSubmittingJob || !sqlQuery.trim()}
-            className={styles.analyzeButton}
-          >
-            {isSubmittingJob ? 'Submitting…' : 'Submit SQL → Get Job ID'}
-          </button>
-        </div>
-        {lastIssuedJobId && (
-          <div className={styles.resultSection}>
-            <div className={styles.metrics}>
-              <div className={styles.metric}>
-                <span className={styles.metricLabel}>Last Job ID:</span>
-                <span className={styles.metricValue}><code>{lastIssuedJobId}</code></span>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className={styles.textareaContainer}>
           <label htmlFor="jobId" className={styles.label}>Job ID:</label>
           <input
@@ -197,11 +166,11 @@ const SqlAnalyzer: React.FC = () => {
         </div>
         <div className={styles.buttonGroup}>
           <button
-            onClick={handleCheckJob}
-            disabled={isCheckingJob || !jobId.trim()}
+            onClick={handleResumeByJobId}
+            disabled={!jobId.trim()}
             className={styles.analyzeButton}
           >
-            {isCheckingJob ? 'Checking…' : 'Check Job Result'}
+            {isPolling ? 'Checking…' : 'Fetch Result'}
           </button>
         </div>
       </div>
@@ -215,7 +184,6 @@ const SqlAnalyzer: React.FC = () => {
       {result && (
         <div className={styles.resultSection}>
           <h3>Discrete PARA-PLAN Taburetka Analysis Results</h3>
-          
           <div className={styles.resultGrid}>
             <div className={styles.resultCard}>
               <h4>Query Overview</h4>

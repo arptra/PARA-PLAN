@@ -14,21 +14,20 @@ const ArchitectureSelect: React.FC = () => {
         <button className={styles.card} onClick={() => navigate('/single')}>
           <div className={styles.cardHeader}>
             <span className={styles.badge}>Available</span>
-            <h3>Single Mode</h3>
+            <h3>Single DB / Single Model</h3>
           </div>
           <p>
             Analyze a single SQL query against one database schema. Submit a query to get a Job ID and poll later.
           </p>
         </button>
 
-        <div className={styles.card} onClick={() => navigate('/database')}>
+        <button className={styles.card} onClick={() => navigate('/database')}>
           <div className={styles.cardHeader}>
-          <span className={styles.badge}>Available</span>
-            {/* <span className={styles.badgeDisabled}>Coming soon</span> */}
-            <h3>DB Connection</h3>
+            <span className={styles.badge}>Available</span>
+            <h3>Database Connection</h3>
           </div>
-          <p>Cross-database analysis and aggregation across multiple schemas.</p>
-        </div>
+          <p>Connect to your database and execute SQL queries.</p>
+        </button>
 
         <div className={styles.cardDisabled}>
           <div className={styles.cardHeader}>
