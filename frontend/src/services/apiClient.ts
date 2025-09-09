@@ -135,10 +135,19 @@ export async function getSqlHints(hintsData: SqlHintsRequest): Promise<SqlHintsR
       method: 'POST',
       body: JSON.stringify(hintsData)
     });
-    if (resp?.success && resp.data) {
-      return resp.data;
+    // Бэкенд может возвращать напрямую массив рекомендаций ИЛИ объект с hints
+    if (Array.isArray(resp)) {
+      return { hints: { tables: [], columns: [], functions: [], keywords: [], suggestions: resp as any } } as any;
     }
-    throw new Error(resp?.error || 'Failed to get SQL hints');
+    // Либо { hints: {...} }
+    if (resp && (resp as any).hints) {
+      return resp as unknown as SqlHintsResponse;
+    }
+    // Поддержка старого формата
+    if ((resp as any)?.success && (resp as any).data) {
+      return (resp as any).data as SqlHintsResponse;
+    }
+    throw new Error((resp as any)?.error || 'Failed to get SQL hints');
   } catch (error) {
     throw new Error(`Failed to get SQL hints: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }

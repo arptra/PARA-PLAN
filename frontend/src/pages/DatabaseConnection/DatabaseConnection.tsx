@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './DatabaseConnection.module.css';
 
 import { DatabaseConfig, QueryResult, AnalyzeResponse } from '../../types';
-import { createConnection, analyzeSql } from '../../services/apiClient';
+import { createConnection, analyzeSql, getSqlHints } from '../../services/apiClient';
 
 const DatabaseConnection: React.FC = () => {
   const [dbConfig, setDbConfig] = useState<DatabaseConfig>({
@@ -26,6 +26,9 @@ const DatabaseConnection: React.FC = () => {
   // Детальный анализ (для модалки/трея)
   const [analysisDetails, setAnalysisDetails] = useState<AnalyzeResponse | null>(null);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  // Smart hints (разные форматы ответа поддерживаем через any)
+  const [sqlHints, setSqlHints] = useState<any>(null);
+  const [isHintsLoading, setIsHintsLoading] = useState(false);
 
   const handleConfigChange = (field: keyof DatabaseConfig, value: string) => {
     setDbConfig(prev => ({
@@ -123,6 +126,29 @@ const DatabaseConnection: React.FC = () => {
     setSqlQuery('');
     setQueryResult(null);
     setQueryError(null);
+    setAnalysisDetails(null);
+    setSqlHints(null);
+  };
+
+  const handleOpenFullAnalysis = () => {
+    if (analysisDetails) setIsAnalysisOpen(true);
+  };
+
+  const handleSmartHints = async () => {
+    if (!connectionId) {
+      setQueryError('No connection ID available. Please reconnect to database.');
+      return;
+    }
+    setIsHintsLoading(true);
+    try {
+      const hints = await getSqlHints({ connectionId, schema: 'public', sql: sqlQuery || '' });
+      setSqlHints(hints);
+      setIsAnalysisOpen(true);
+    } catch (e) {
+      setQueryError(e instanceof Error ? e.message : 'Failed to get SQL hints');
+    } finally {
+      setIsHintsLoading(false);
+    }
   };
 
   return (
@@ -294,35 +320,32 @@ const DatabaseConnection: React.FC = () => {
             </div>
           </div>
 
+          <div className={styles.actionsRow}>
+            <button
+              className={styles.secondaryButton}
+              onClick={handleOpenFullAnalysis}
+              disabled={!analysisDetails}
+              title={analysisDetails ? 'Открыть полный анализ' : 'Сначала выполните анализ'}
+            >
+              Полный анализ
+            </button>
+            <button
+              className={styles.secondaryButton}
+              onClick={handleSmartHints}
+              disabled={isHintsLoading}
+              title="Подсказки по SQL"
+            >
+              {isHintsLoading ? 'Smart…' : 'Smart hints'}
+            </button>
+          </div>
+
           {queryError && (
             <div className={styles.error}>
               <p>{queryError}</p>
             </div>
           )}
 
-          {queryResult && (
-            <div className={styles.resultSection}>
-              <h3>Discrete PARA-PLAN Taburetka Query Results</h3>
-              
-              <div className={styles.resultInfo}>
-                <span>Estimated Rows: {queryResult.rowCount}</span>
-                <span>Execution Time: {queryResult.executionTime}ms</span>
-              </div>
-
-              <div className={styles.analysisContainer}>
-                <h4>Detected Columns:</h4>
-                <div className={styles.columnsList}>
-                  {queryResult.columns.length > 0 ? (
-                    queryResult.columns.map((column, index) => (
-                      <span key={index} className={styles.columnTag}>{column}</span>
-                    ))
-                  ) : (
-                    <span className={styles.noColumns}>No columns detected</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Убрали resultSection. Данные доступны в модалке и через кнопки выше */}
         </div>
       )}
       {/* Модалка с полным анализом */}
@@ -412,6 +435,44 @@ const DatabaseConnection: React.FC = () => {
                 </section>
               )}
 
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.secondaryButton} onClick={() => setIsAnalysisOpen(false)}>Свернуть в трей</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Модалка Smart hints */}
+      {sqlHints && isAnalysisOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsAnalysisOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Smart hints</h3>
+              <button className={styles.modalClose} onClick={() => setIsAnalysisOpen(false)}>×</button>
+            </div>
+            <div className={styles.modalBody}>
+              {Array.isArray(sqlHints) ? (
+                <section className={styles.section}>
+                  <h4>Рекомендации к правке SQL</h4>
+                  <ul className={styles.list}>
+                    {sqlHints.map((h: any, i: number) => (
+                      <li key={i}>
+                        <div><strong>{h.message}</strong></div>
+                        {h.replacement && (
+                          <pre className={styles.codeBlock}>{h.replacement}</pre>
+                        )}
+                        {(typeof h.start === 'number' && typeof h.end === 'number') && (
+                          <div className={styles.kvRow}>
+                            <div>range</div><div>{h.start} - {h.end}</div>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : (
+                <div className={styles.noColumns}>Нет данных подсказок</div>
+              )}
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.secondaryButton} onClick={() => setIsAnalysisOpen(false)}>Свернуть в трей</button>
