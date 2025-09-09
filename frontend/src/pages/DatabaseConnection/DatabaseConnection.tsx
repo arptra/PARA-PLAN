@@ -29,6 +29,10 @@ const DatabaseConnection: React.FC = () => {
   // Smart hints (разные форматы ответа поддерживаем через any)
   const [sqlHints, setSqlHints] = useState<any>(null);
   const [isHintsLoading, setIsHintsLoading] = useState(false);
+  // Состояние для блокировки textarea после анализа
+  const [isQueryAnalyzed, setIsQueryAnalyzed] = useState(false);
+  // Состояние для показа подсвеченного текста
+  const [showHighlighted, setShowHighlighted] = useState(false);
 
   const handleConfigChange = (field: keyof DatabaseConfig, value: string) => {
     setDbConfig(prev => ({
@@ -114,6 +118,7 @@ const DatabaseConnection: React.FC = () => {
 
       setQueryResult(queryResult);
       setAnalysisDetails(result);
+      setIsQueryAnalyzed(true);
       setIsAnalysisOpen(true);
     } catch (err) {
       setQueryError(err instanceof Error ? err.message : 'Failed to analyze SQL query.');
@@ -128,6 +133,8 @@ const DatabaseConnection: React.FC = () => {
     setQueryError(null);
     setAnalysisDetails(null);
     setSqlHints(null);
+    setIsQueryAnalyzed(false);
+    setShowHighlighted(false);
   };
 
   const handleOpenFullAnalysis = () => {
@@ -142,13 +149,71 @@ const DatabaseConnection: React.FC = () => {
     setIsHintsLoading(true);
     try {
       const hints = await getSqlHints({ connectionId, schema: 'public', sql: sqlQuery || '' });
+      console.log('Smart hints response:', hints);
       setSqlHints(hints);
-      setIsAnalysisOpen(true);
+      setShowHighlighted(true); // Показываем подсвеченный текст
     } catch (e) {
       setQueryError(e instanceof Error ? e.message : 'Failed to get SQL hints');
     } finally {
       setIsHintsLoading(false);
     }
+  };
+
+  // Функция для рендеринга подсвеченного SQL с tooltip'ами
+  const renderHighlightedSql = () => {
+    if (!sqlHints) {
+      return sqlQuery;
+    }
+
+    // Извлекаем массив подсказок из разных возможных форматов
+    let hintsArray = [];
+    if (Array.isArray(sqlHints)) {
+      hintsArray = sqlHints;
+    } else if (sqlHints.hints && Array.isArray(sqlHints.hints)) {
+      hintsArray = sqlHints.hints;
+    } else if (sqlHints.suggestions && Array.isArray(sqlHints.suggestions)) {
+      hintsArray = sqlHints.suggestions;
+    } else if (sqlHints.hints && sqlHints.hints.suggestions && Array.isArray(sqlHints.hints.suggestions)) {
+      hintsArray = sqlHints.hints.suggestions;
+    }
+
+    if (hintsArray.length === 0) {
+      return sqlQuery;
+    }
+
+    // Сортируем подсказки по позиции start
+    const sortedHints = [...hintsArray].sort((a, b) => a.start - b.start);
+    
+    let result = [];
+    let lastIndex = 0;
+
+    sortedHints.forEach((hint, index) => {
+      // Добавляем текст до подсказки
+      if (hint.start > lastIndex) {
+        result.push(sqlQuery.slice(lastIndex, hint.start));
+      }
+      
+      // Добавляем подсвеченный текст с tooltip и разными цветами
+      const colorClass = `highlightedText${index % 4}`; // 4 разных цвета
+      result.push(
+        <span
+          key={`hint-${index}`}
+          className={`${styles.highlightedText} ${styles[colorClass]}`}
+          title={hint.message}
+        >
+          {sqlQuery.slice(hint.start, hint.end)}
+        </span>
+      );
+      
+      lastIndex = hint.end;
+    });
+
+    // Добавляем оставшийся текст
+    if (lastIndex < sqlQuery.length) {
+      result.push(sqlQuery.slice(lastIndex));
+    }
+
+    return result;
   };
 
   return (
@@ -297,55 +362,71 @@ const DatabaseConnection: React.FC = () => {
             <label htmlFor="sqlQuery" className={styles.label}>
               SQL Query:
             </label>
-            <textarea
-              id="sqlQuery"
-              value={sqlQuery}
-              onChange={(e) => setSqlQuery(e.target.value)}
-              placeholder="SELECT * FROM users WHERE status = 'active'"
-              className={styles.textarea}
-              rows={6}
-            />
+            {showHighlighted && sqlHints && sqlHints.hints && sqlHints.hints.suggestions && sqlHints.hints.suggestions.length > 0 ? (
+              <div className={styles.highlightedSqlContainer}>
+                <div className={styles.highlightedSql}>
+                  {renderHighlightedSql()}
+                </div>
+              </div>
+            ) : (
+              <textarea
+                id="sqlQuery"
+                value={sqlQuery}
+                onChange={(e) => setSqlQuery(e.target.value)}
+                placeholder="SELECT * FROM users WHERE status = 'active'"
+                className={styles.textarea}
+                rows={6}
+              />
+            )}
             
             <div className={styles.queryButtons}>
-              <button
-                onClick={handleExecuteQuery}
-                disabled={isExecuting || !sqlQuery.trim()}
-                className={styles.executeButton}
-              >
-                {isExecuting ? 'Executing...' : 'Execute Query'}
-              </button>
-              <button onClick={handleClearQuery} className={styles.clearButton}>
-                Clear
-              </button>
+              {!isQueryAnalyzed ? (
+                <>
+                  <button
+                    onClick={handleExecuteQuery}
+                    disabled={isExecuting || !sqlQuery.trim()}
+                    className={styles.executeButton}
+                  >
+                    {isExecuting ? 'Executing...' : 'Execute Query'}
+                  </button>
+                  <button onClick={handleClearQuery} className={styles.clearButton}>
+                    Clear
+                  </button>
+                </>
+              ) : (
+                <button onClick={handleClearQuery} className={styles.clearButton}>
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
-          <div className={styles.actionsRow}>
-            <button
-              className={styles.secondaryButton}
-              onClick={handleOpenFullAnalysis}
-              disabled={!analysisDetails}
-              title={analysisDetails ? 'Открыть полный анализ' : 'Сначала выполните анализ'}
-            >
-              Полный анализ
-            </button>
-            <button
-              className={styles.secondaryButton}
-              onClick={handleSmartHints}
-              disabled={isHintsLoading}
-              title="Подсказки по SQL"
-            >
-              {isHintsLoading ? 'Smart…' : 'Smart hints'}
-            </button>
-          </div>
+          {isQueryAnalyzed && (
+            <div className={styles.actionsRow}>
+              <button
+                className={styles.secondaryButton}
+                onClick={handleOpenFullAnalysis}
+                disabled={!analysisDetails}
+                title={analysisDetails ? 'Открыть полный анализ' : 'Сначала выполните анализ'}
+              >
+                Полный анализ
+              </button>
+              <button
+                className={styles.secondaryButton}
+                onClick={handleSmartHints}
+                disabled={isHintsLoading}
+                title="Подсказки по SQL"
+              >
+                {isHintsLoading ? 'Smart…' : 'Smart hints'}
+              </button>
+            </div>
+          )}
 
           {queryError && (
             <div className={styles.error}>
               <p>{queryError}</p>
             </div>
           )}
-
-          {/* Убрали resultSection. Данные доступны в модалке и через кнопки выше */}
         </div>
       )}
       {/* Модалка с полным анализом */}
@@ -435,44 +516,6 @@ const DatabaseConnection: React.FC = () => {
                 </section>
               )}
 
-            </div>
-            <div className={styles.modalFooter}>
-              <button className={styles.secondaryButton} onClick={() => setIsAnalysisOpen(false)}>Свернуть в трей</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Модалка Smart hints */}
-      {sqlHints && isAnalysisOpen && (
-        <div className={styles.modalOverlay} onClick={() => setIsAnalysisOpen(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>Smart hints</h3>
-              <button className={styles.modalClose} onClick={() => setIsAnalysisOpen(false)}>×</button>
-            </div>
-            <div className={styles.modalBody}>
-              {Array.isArray(sqlHints) ? (
-                <section className={styles.section}>
-                  <h4>Рекомендации к правке SQL</h4>
-                  <ul className={styles.list}>
-                    {sqlHints.map((h: any, i: number) => (
-                      <li key={i}>
-                        <div><strong>{h.message}</strong></div>
-                        {h.replacement && (
-                          <pre className={styles.codeBlock}>{h.replacement}</pre>
-                        )}
-                        {(typeof h.start === 'number' && typeof h.end === 'number') && (
-                          <div className={styles.kvRow}>
-                            <div>range</div><div>{h.start} - {h.end}</div>
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : (
-                <div className={styles.noColumns}>Нет данных подсказок</div>
-              )}
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.secondaryButton} onClick={() => setIsAnalysisOpen(false)}>Свернуть в трей</button>

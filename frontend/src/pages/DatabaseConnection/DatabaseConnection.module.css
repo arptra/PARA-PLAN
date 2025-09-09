@@ -669,3 +669,114 @@
   font-size: 0.85rem;
   margin-top: 0.4rem;
 }
+
+/* Стили для контейнера подсвеченного SQL */
+.highlightedSqlContainer {
+  width: 100%;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.highlightedSql {
+  padding: 1rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  min-height: 120px;
+  color: #495057;
+  user-select: none;
+  cursor: default;
+}
+
+.highlightedText {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 3px;
+  padding: 1px 2px;
+  cursor: help;
+  position: relative;
+  transition: all 0.2s ease;
+  color: #495057;
+  pointer-events: auto;
+}
+
+.highlightedText:hover {
+  background: #ffeaa7;
+  border-color: #fdcb6e;
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.highlightedText::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 300px;
+  word-wrap: break-word;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.highlightedText:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Разные цвета для разных индексов */
+.highlightedText0 {
+  background: #fff3cd !important;
+  border-color: #ffeaa7 !important;
+}
+
+.highlightedText1 {
+  background: #d1ecf1 !important;
+  border-color: #bee5eb !important;
+}
+
+.highlightedText2 {
+  background: #d4edda !important;
+  border-color: #c3e6cb !important;
+}
+
+.highlightedText3 {
+  background: #f8d7da !important;
+  border-color: #f5c6cb !important;
+}
+
+.highlightedText0:hover {
+  background: #ffeaa7 !important;
+  border-color: #fdcb6e !important;
+}
+
+.highlightedText1:hover {
+  background: #bee5eb !important;
+  border-color: #abdde5 !important;
+}
+
+.highlightedText2:hover {
+  background: #c3e6cb !important;
+  border-color: #b1dfbb !important;
+}
+
+.highlightedText3:hover {
+  background: #f5c6cb !important;
+  border-color: #f1b0b7 !important;
+}
+
