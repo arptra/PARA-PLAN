@@ -24,15 +24,56 @@ export interface AnalyzeRequest {
 
 export interface AnalyzeResponse {
   predicted: {
-    tables: string[];
-    columns: string[];
-    joins: string[];
-    whereConditions: string[];
-    orderBy: string[];
-    groupBy: string[];
-    estimatedRows: number;
-    complexity: 'LOW' | 'MEDIUM' | 'HIGH';
-    suggestions: string[];
+    p50ms: number;
+    p95ms: number;
+    tempSpillRisk: number;
+    ioRisk: number;
+    planRows?: number;
+    estimatedPages?: number;
+    estimatedMemKB?: number;
+    columns?: string[];
+    tables?: string[];
+    joins?: string[];
+    whereConditions?: string[];
+    orderBy?: string[];
+    groupBy?: string[];
+    estimatedRows?: number;
+    complexity?: 'LOW' | 'MEDIUM' | 'HIGH';
+    suggestions?: string[];
+  };
+  distribution?: {
+    p50ms: number;
+    p95ms: number;
+    p99ms: number;
+  };
+  features?: {
+    totalCost: number;
+    planRows: number;
+    depth: number;
+    seqScans: number;
+    indexScans?: number;
+  };
+  landscape?: {
+    baseCost: number;
+    worstCost: number;
+    variance: number;
+    regret?: number;
+  };
+  locks?: {
+    level: string;
+    objects: string[];
+    estimatedMs: number;
+    advice?: string[];
+  };
+  recommendations?: Array<{
+    kind: string;
+    title: string;
+  }>;
+  advice?: string;
+  serverFit?: {
+    workMem: string;
+    sharedBuffers: string;
+    effectiveCacheSize: string;
   };
   executionTime?: number;
 }

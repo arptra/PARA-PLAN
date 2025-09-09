@@ -476,3 +476,179 @@
   font-weight: 600;
   margin-left: 0.5rem;
 }
+
+/* Стили для анализа SQL */
+.analysisContainer {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-top: 1rem;
+}
+
+.analysisContainer h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.columnsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.columnTag {
+  background: #007bff;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.noColumns {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Modal & tray */
+.trayButton {
+  margin-top: 1rem;
+  background: #343a40;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(900px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalBody {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.modalClose {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.section {
+  margin-top: 1rem;
+}
+
+.kvRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 0.4rem;
+  column-gap: 1rem;
+  align-items: center;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.compactTray {
+  margin-top: 1rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+}
+
+.compactTray:focus {
+  outline: 2px solid #80bdff;
+  outline-offset: 2px;
+}
+
+.compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.trayTitle {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.trayMetrics span {
+  display: inline-block;
+  margin-left: 0.75rem;
+  color: #495057;
+}
+
+.compactAdvice {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #343a40;
+}
+
+.compactAdvice li {
+  margin: 0.2rem 0;
+}
+
+.compactHint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+}

@@ -66,9 +66,17 @@ export async function createConnection(connectionData: CreateConnectionRequest):
       method: 'POST',
       body: JSON.stringify(connectionData)
     });
+    
+    // Бэкенд возвращает {id: "..."} напрямую, а не в обертке
+    if (resp && 'id' in resp) {
+      return resp as CreateConnectionResponse;
+    }
+    
+    // Если ответ в старом формате {success: true, data: {id: "..."}}
     if (resp?.success && resp.data) {
       return resp.data;
     }
+    
     throw new Error(resp?.error || 'Failed to create connection');
   } catch (error) {
     throw new Error(`Connection creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -101,9 +109,17 @@ export async function analyzeSql(analyzeData: AnalyzeRequest): Promise<AnalyzeRe
       method: 'POST',
       body: JSON.stringify(analyzeData)
     });
+    
+    // Бэкенд возвращает ответ напрямую с полями predicted, recommendations и т.д.
+    if (resp && 'predicted' in resp) {
+      return resp as AnalyzeResponse;
+    }
+    
+    // Если ответ в старом формате {success: true, data: {...}}
     if (resp?.success && resp.data) {
       return resp.data;
     }
+    
     throw new Error(resp?.error || 'Failed to analyze SQL');
   } catch (error) {
     throw new Error(`SQL analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
