@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './DatabaseConnection.module.css';
 
 import { DatabaseConfig, QueryResult } from '../../types';
+import { createConnection } from '../../services/apiClient';
 
 const DatabaseConnection: React.FC = () => {
   const [dbConfig, setDbConfig] = useState<DatabaseConfig>({
@@ -16,6 +17,7 @@ const DatabaseConnection: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionId, setConnectionId] = useState<string | null>(null);
   
   const [sqlQuery, setSqlQuery] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
@@ -39,15 +41,24 @@ const DatabaseConnection: React.FC = () => {
     setConnectionError(null);
 
     try {
-      // Заглушка для API вызова подключения
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Создаем подключение через API
+      const result = await createConnection({
+        host: dbConfig.host,
+        port: parseInt(dbConfig.port),
+        database: dbConfig.database,
+        user: dbConfig.username,
+        password: dbConfig.password,
+        info: `${dbConfig.type} connection`
+      });
       
-      // Мок успешного подключения
+      // Сохраняем ID подключения
+      setConnectionId(result.id);
       setIsConnected(true);
       setConnectionError(null);
     } catch (err) {
-      setConnectionError('Failed to connect to database. Please check your credentials.');
+      setConnectionError(err instanceof Error ? err.message : 'Failed to connect to database. Please check your credentials.');
       setIsConnected(false);
+      setConnectionId(null);
     } finally {
       setIsConnecting(false);
     }
@@ -55,6 +66,7 @@ const DatabaseConnection: React.FC = () => {
 
   const handleDisconnect = () => {
     setIsConnected(false);
+    setConnectionId(null);
     setQueryResult(null);
     setQueryError(null);
     setSqlQuery('');
@@ -230,6 +242,7 @@ const DatabaseConnection: React.FC = () => {
             <div className={styles.statusIndicator}>
               <span className={styles.statusDot}></span>
               Connected to {dbConfig.type}://{dbConfig.host}:{dbConfig.port}/{dbConfig.database}
+              {connectionId && <span className={styles.connectionId}> (ID: {connectionId})</span>}
             </div>
             <button onClick={handleDisconnect} className={styles.disconnectButton}>
               Disconnect
