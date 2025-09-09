@@ -337,3 +337,446 @@
     text-align: center;
   }
 }
+
+/* Стили для загрузки подключений */
+.loadingSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.loader {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Стили для информации о подключениях */
+.connectionsInfo {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.connectionsInfo h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.connectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.connectionItem {
+  padding: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.connectionItem:hover {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.activeConnection {
+  border-color: #28a745;
+  background: #f0fff4;
+}
+
+.connectionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.connectionInfo strong {
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status.error {
+  background: #f5c6cb;
+  color: #721c24;
+}
+
+.connectionDescription {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.currentConnection {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.currentConnection p {
+  margin: 0;
+  color: #155724;
+  font-weight: 500;
+}
+
+.connectionId {
+  color: #007bff;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Стили для анализа SQL */
+.analysisContainer {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-top: 1rem;
+}
+
+.analysisContainer h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.columnsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.columnTag {
+  background: #007bff;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.noColumns {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Modal & tray */
+.trayButton {
+  margin-top: 1rem;
+  background: #343a40;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(900px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalBody {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.modalClose {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.section {
+  margin-top: 1rem;
+}
+
+.kvRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 0.4rem;
+  column-gap: 1rem;
+  align-items: center;
+}
+
+.codeBlock {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
+  white-space: pre-wrap;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.compactTray {
+  margin-top: 1rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+}
+
+.compactTray:focus {
+  outline: 2px solid #80bdff;
+  outline-offset: 2px;
+}
+
+.compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.trayTitle {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.trayMetrics span {
+  display: inline-block;
+  margin-left: 0.75rem;
+  color: #495057;
+}
+
+.compactAdvice {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #343a40;
+}
+
+.compactAdvice li {
+  margin: 0.2rem 0;
+}
+
+.compactHint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+}
+
+/* Стили для контейнера подсвеченного SQL */
+.highlightedSqlContainer {
+  width: 100%;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.highlightedSql {
+  padding: 1rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  min-height: 120px;
+  color: #495057;
+  user-select: none;
+  cursor: default;
+}
+
+.highlightedText {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 3px;
+  padding: 1px 2px;
+  cursor: help;
+  position: relative;
+  transition: all 0.2s ease;
+  color: #495057;
+  pointer-events: auto;
+}
+
+.highlightedText:hover {
+  background: #ffeaa7;
+  border-color: #fdcb6e;
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.highlightedText::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 300px;
+  word-wrap: break-word;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.highlightedText:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Разные цвета для разных индексов */
+.highlightedText0 {
+  background: #fff3cd !important;
+  border-color: #ffeaa7 !important;
+}
+
+.highlightedText1 {
+  background: #d1ecf1 !important;
+  border-color: #bee5eb !important;
+}
+
+.highlightedText2 {
+  background: #d4edda !important;
+  border-color: #c3e6cb !important;
+}
+
+.highlightedText3 {
+  background: #f8d7da !important;
+  border-color: #f5c6cb !important;
+}
+
+.highlightedText0:hover {
+  background: #ffeaa7 !important;
+  border-color: #fdcb6e !important;
+}
+
+.highlightedText1:hover {
+  background: #bee5eb !important;
+  border-color: #abdde5 !important;
+}
+
+.highlightedText2:hover {
+  background: #c3e6cb !important;
+  border-color: #b1dfbb !important;
+}
+
+.highlightedText3:hover {
+  background: #f5c6cb !important;
+  border-color: #f1b0b7 !important;
+}
+

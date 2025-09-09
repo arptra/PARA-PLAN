@@ -1,22 +1,25 @@
 export const API_CONFIG = {
-  BASE_URL: (import.meta as any).env?.VITE_API_URL || 'http://localhost:8080/api',
+  BASE_URL: (import.meta as any).env?.VITE_API_URL || '',
   
   TIMEOUT: 30000,
   
   ENDPOINTS: {
+    // Управление подключениями к БД
+    CONNECTIONS: '/connections',
+    
     // Анализ SQL запроса
-    ANALYZE_SQL: '/sql/analyze',
+    ANALYZE: '/api/analyze',
     
-    // Подключение к БД
-    CONNECT_DB: '/database/connect',
-    DISCONNECT_DB: '/database/disconnect',
+    // SQL подсказки
+    SQL_HINTS: '/api/sql-hints',
     
-    // Выполнение запроса на подключенной БД
-    EXECUTE_QUERY: '/database/execute',
 
-    // Джобы
-    SUBMIT_JOB: '/jobs/submit',
-    GET_JOB: (jobId: string) => `/jobs/${jobId}`,
+    ANALYZE_SQL: '/api/sql/analyze',
+    CONNECT_DB: '/api/database/connect',
+    DISCONNECT_DB: '/api/database/disconnect',
+    EXECUTE_QUERY: '/api/database/execute',
+    SUBMIT_JOB: '/api/jobs/submit',
+    GET_JOB: (jobId: string) => `/api/jobs/${jobId}`,
   }
 };
 

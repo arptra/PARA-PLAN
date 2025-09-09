@@ -15,6 +15,86 @@ export interface AnalysisResult {
   executionTime?: number;
 }
 
+// Типы для нового API анализа SQL
+export interface AnalyzeRequest {
+  connectionId: string;
+  schema: string;
+  sql: string;
+}
+
+export interface AnalyzeResponse {
+  predicted: {
+    p50ms: number;
+    p95ms: number;
+    tempSpillRisk: number;
+    ioRisk: number;
+    planRows?: number;
+    estimatedPages?: number;
+    estimatedMemKB?: number;
+    columns?: string[];
+    tables?: string[];
+    joins?: string[];
+    whereConditions?: string[];
+    orderBy?: string[];
+    groupBy?: string[];
+    estimatedRows?: number;
+    complexity?: 'LOW' | 'MEDIUM' | 'HIGH';
+    suggestions?: string[];
+  };
+  distribution?: {
+    p50ms: number;
+    p95ms: number;
+    p99ms: number;
+  };
+  features?: {
+    totalCost: number;
+    planRows: number;
+    depth: number;
+    seqScans: number;
+    indexScans?: number;
+  };
+  landscape?: {
+    baseCost: number;
+    worstCost: number;
+    variance: number;
+    regret?: number;
+  };
+  locks?: {
+    level: string;
+    objects: string[];
+    estimatedMs: number;
+    advice?: string[];
+  };
+  recommendations?: Array<{
+    kind: string;
+    title: string;
+  }>;
+  advice?: string;
+  serverFit?: {
+    workMem: string;
+    sharedBuffers: string;
+    effectiveCacheSize: string;
+  };
+  executionTime?: number;
+}
+
+// Типы для SQL подсказок
+export interface SqlHintsRequest {
+  connectionId: string;
+  schema: string;
+  sql: string;
+}
+
+export interface SqlHintsResponse {
+  hints: {
+    tables: string[];
+    columns: string[];
+    functions: string[];
+    keywords: string[];
+    suggestions: string[];
+  };
+}
+
 // Типы для подключения к БД
 export interface DatabaseConfig {
   host: string;
@@ -26,6 +106,36 @@ export interface DatabaseConfig {
 }
 
 export type DatabaseType = 'postgresql' | 'mysql' | 'sqlserver' | 'oracle';
+
+// Типы для создания подключения к БД (новый API)
+export interface CreateConnectionRequest {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+  info?: string;
+}
+
+export interface CreateConnectionResponse {
+  id: string;
+}
+
+// Типы для списка подключений
+export interface Connection {
+  id: string;
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  info?: string;
+  status: 'active' | 'inactive' | 'error';
+  createdAt: string;
+}
+
+export interface ConnectionsListResponse {
+  connections: Connection[];
+}
 
 // Типы для результатов запросов
 export interface QueryResult {
