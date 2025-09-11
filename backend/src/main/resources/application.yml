@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+paraplan:
+  jobs:
+    maxWaitSeconds: 30
+  webhooks:
+    connectTimeoutMs: 2000
+    readTimeoutMs: 3000
